@@ -6,10 +6,6 @@ import io
 st.set_page_config(page_title="Early Access UI Test")
 st.title("Early Access UI Test")
 
-modes = {
-    "Supportive Approach": "Gentle, measured, non-intrusive tone."
-}
-mode = "Supportive Approach"
 st.markdown(f"**Access:** Early Access UI Test")
 st.caption("Prototype for user feedback")
 
@@ -39,7 +35,6 @@ if user_input and (
     st.session_state.session_history.append({
         "prompt": user_input,
         "response": f"Response to: {user_input}",
-        "mode": mode,
         "timestamp": timestamp
     })
 
@@ -58,13 +53,20 @@ if st.checkbox("Show Session History"):
         for entry in st.session_state.session_history:
             export_data += f"Prompt: {entry.get('prompt', '')}\n"
             export_data += f"Response: {entry.get('response', '')}\n"
-            export_data += f"Mode: {entry.get('mode', '')}\n"
             export_data += f"Timestamp: {entry.get('timestamp', '')}\n\n"
         file_data = io.StringIO(export_data)
-        file_name = f"history_{datetime.datetime.now().isoformat().replace(':', '_')}.txt"
+        file_name = f"session_history_{datetime.datetime.now().isoformat().replace(':', '_')}.txt"
     else:
-        file_data = io.StringIO(json.dumps(st.session_state.session_history, indent=2))
-        file_name = f"history_{datetime.datetime.now().isoformat().replace(':', '_')}.json"
+        clean_entries = [
+            {
+                "prompt": entry.get("prompt", ""),
+                "response": entry.get("response", ""),
+                "timestamp": entry.get("timestamp", "")
+            }
+            for entry in st.session_state.session_history
+        ]
+        file_data = io.StringIO(json.dumps(clean_entries, indent=2))
+        file_name = f"session_history_{datetime.datetime.now().isoformat().replace(':', '_')}.json"
 
     st.download_button(
         label="Download History Log",
@@ -82,7 +84,6 @@ if st.checkbox("Show Session History"):
         st.markdown(
             f"**Prompt:** {entry.get('prompt', '')}<br>"
             f"**Response:** {entry.get('response', '')}<br>"
-            f"**Mode:** {entry.get('mode', '')}<br>"
             f"**Timestamp:** {entry.get('timestamp', '')}",
             unsafe_allow_html=True
         )
